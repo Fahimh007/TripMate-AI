@@ -2,10 +2,8 @@ from pathlib import Path
 import traceback
 
 import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from backend import run_travel_agent, resume_travel_agent
@@ -27,13 +25,7 @@ app = FastAPI(
     version="2.0.0",
 )
 
-app.mount(
-    "/static",
-    StaticFiles(directory=str(BASE_DIR / "static")),
-    name="static",
-)
-
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+FRONTEND_DIST = BASE_DIR / "frontend" / "client" / "dist"
 
 
 class TravelRequest(BaseModel):
@@ -47,13 +39,9 @@ class ApprovalRequest(BaseModel):
     feedback: str = ""
 
 
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={},
-    )
+@app.get("/")
+async def home():
+    return FileResponse(FRONTEND_DIST / "index.html")
 
 
 @app.post("/api/travel")
