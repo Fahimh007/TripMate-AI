@@ -47,17 +47,10 @@ def _request_json(
     except requests.RequestException as exc:
         details = ""
 
-        failed_response = getattr(
-            exc,
-            "response",
-            None,
-        )
+        failed_response = getattr(exc, "response", None)
 
         if failed_response is not None:
-            details = (
-                f" Response: "
-                f"{failed_response.text[:500]}"
-            )
+            details = f" Response: {failed_response.text[:500]}"
 
         raise RuntimeError(
             f"OpenWeather request failed: "
@@ -132,13 +125,7 @@ def get_forecast(
     ]
 
     return {
-        "city": data.get(
-            "city",
-            {},
-        ).get(
-            "name",
-            city,
-        ),
+        "city": data.get("city", {}).get("name", city),
         "forecast": forecast,
     }
 

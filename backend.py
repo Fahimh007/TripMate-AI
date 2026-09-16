@@ -63,27 +63,21 @@ llm = ChatGroq(
     api_key=GROQ_API_KEY,
 )
 
-# =========================
-# State - original fields kept, new control fields added
-# =========================
 class TravelState(TypedDict, total=False):
     messages: Annotated[list[AnyMessage], operator.add]
     user_query: str
 
-    # Supervisor + guardrail state
     guardrail_allowed: bool
     guardrail_reason: str
     selected_agents: list[str]
     trip_constraints: dict[str, Any]
     supervisor_reasoning: str
 
-    # Original specialist results
     flight_results: str
     hotel_results: str
     weather_results: str
     itinerary: str
 
-    # New budget + HITL state
     budget_results: str
     approval_request: str
     approved: bool
@@ -92,17 +86,6 @@ class TravelState(TypedDict, total=False):
 
     llm_calls: int
 
-
-# =========================
-# Shared helpers
-# =========================
-KNOWN_AGENTS = {
-    "flight_agent",
-    "hotel_agent",
-    "weather_agent",
-    "budget_agent",
-    "itinerary_agent",
-}
 
 AGENT_ORDER = [
     "flight_agent",
@@ -145,9 +128,6 @@ def _empty_constraints() -> dict[str, Any]:
     }
 
 
-# =========================
-# Supervisor Agent + Input Guardrail
-# =========================
 def supervisor_agent(state: TravelState):
     query = state["user_query"]
     llm_calls = state.get("llm_calls", 0)
@@ -243,10 +223,9 @@ User request:
         requested_agents = parsed.get("selected_agents", [])
         selected_agents = [
             name for name in AGENT_ORDER
-            if name in requested_agents and name in KNOWN_AGENTS
+            if name in requested_agents
         ]
 
-        # The itinerary agent integrates whichever specialist results were selected.
         if "itinerary_agent" not in selected_agents:
             selected_agents.append("itinerary_agent")
 
@@ -259,7 +238,6 @@ User request:
         llm_calls += 1
     except Exception as exc:
         print(f"Supervisor fallback used: {exc}")
-        # Original workflow behavior is preserved as the fallback.
         selected_agents = AGENT_ORDER.copy()
         constraints = _empty_constraints()
         reasoning = (
@@ -278,9 +256,6 @@ User request:
     }
 
 
-# =========================
-# Guardrail blocked response
-# =========================
 def guardrail_blocked_agent(state: TravelState):
     reason = state.get("final_response") or state.get("guardrail_reason") or (
         "This request was blocked by the travel input guardrail."
@@ -291,9 +266,6 @@ def guardrail_blocked_agent(state: TravelState):
     }
 
 
-# =========================
-# Flight Agent - original behavior kept
-# =========================
 FLIGHT_AGENT_PROMPT = """
 You are a travel flight expert.
 
@@ -320,15 +292,11 @@ Return concise travel guidance.
 
 
 def flight_agent(state: TravelState):
-    print("\nINSIDE FLIGHT AGENT\n")
     query = state["user_query"]
 
     try:
         airports = asyncio.run(aviation_mcp_call("list_airports"))
         airlines = asyncio.run(aviation_mcp_call("list_airlines"))
-
-        print("\nAIRPORTS:", airports)
-        print("\nAIRLINES:", airlines)
 
         prompt = FLIGHT_AGENT_PROMPT.format(
             query=query,
@@ -353,9 +321,6 @@ def flight_agent(state: TravelState):
     }
 
 
-# =========================
-# Hotel Agent - original behavior kept
-# =========================
 def hotel_agent(state: TravelState):
     query = (
         f"Best hotels for "
@@ -394,9 +359,6 @@ def hotel_agent(state: TravelState):
     }
 
 
-# =========================
-# Weather Agent - original behavior kept
-# =========================
 def weather_agent(state: TravelState):
     city = extract_destination(
         state["user_query"]
@@ -443,9 +405,6 @@ Forecast:
     }
 
 
-# =========================
-# Budget Agent - new specialist
-# =========================
 def budget_agent(state: TravelState):
     prompt = f"""
 Analyze whether this trip is realistic for the user's budget.
@@ -488,9 +447,6 @@ If exact live prices are unavailable, clearly label estimates as approximate.
     }
 
 
-# =========================
-# Itinerary Agent - original behavior extended with selected results
-# =========================
 def itinerary_agent(state: TravelState):
     prompt = f"""
 Create a complete travel itinerary.
@@ -537,9 +493,6 @@ Create a clear draft that is ready for human review.
     }
 
 
-# =========================
-# Human-in-the-Loop approval
-# =========================
 def human_approval_agent(state: TravelState):
     # Do not wrap interrupt() in try/except. LangGraph uses it to pause execution.
     review = interrupt(
@@ -566,9 +519,6 @@ def human_approval_agent(state: TravelState):
     }
 
 
-# =========================
-# Final Response Agent - original format kept, HITL feedback added
-# =========================
 def final_agent(state: TravelState):
     if state.get("approved", False):
         review_instruction = (
@@ -640,9 +590,6 @@ Important:
     }
 
 
-# =========================
-# Dynamic Supervisor Routing
-# =========================
 ROUTE_MAP = {
     "guardrail_blocked": "guardrail_blocked",
     "flight_agent": "flight_agent",
@@ -680,9 +627,6 @@ def route_after_agent(current_agent: str):
     return route
 
 
-# =========================
-# Build Graph
-# =========================
 graph = StateGraph(TravelState)
 
 graph.add_node("supervisor", supervisor_agent)
@@ -716,9 +660,6 @@ graph.add_edge("human_approval", "final_agent")
 graph.add_edge("final_agent", END)
 graph.add_edge("guardrail_blocked", END)
 
-# =========================
-# PostgreSQL Checkpointer - original persistence kept
-# =========================
 DATABASE_URL = get_database_url()
 _conn = psycopg.connect(
     DATABASE_URL,

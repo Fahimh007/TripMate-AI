@@ -48,7 +48,7 @@ function Planner({ message, setMessage, busy, error, onSubmit }) {
         <textarea
           id="travel-request"
           value={message}
-          onChange={(event) => setMessage(event.target.value)}
+          onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(event) => {
             if (event.ctrlKey && event.key === "Enter") {
               event.currentTarget.form?.requestSubmit();

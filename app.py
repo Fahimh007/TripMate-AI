@@ -8,8 +8,6 @@ from pydantic import BaseModel, Field
 
 from backend import run_travel_agent, resume_travel_agent
 
-# This is kept from the original project to allow the existing synchronous
-# agent functions to call async MCP helpers inside FastAPI.
 import nest_asyncio
 
 nest_asyncio.apply()
@@ -71,7 +69,6 @@ async def travel_planner(request_data: TravelRequest):
         )
 
     except Exception as exc:
-        print("ERROR:", exc)
         traceback.print_exc()
 
         return JSONResponse(
@@ -109,7 +106,6 @@ async def approve_travel_plan(request_data: ApprovalRequest):
         )
 
     except Exception as exc:
-        print("APPROVAL ERROR:", exc)
         traceback.print_exc()
 
         return JSONResponse(
