@@ -4,6 +4,7 @@ import traceback
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from backend import run_travel_agent, resume_travel_agent
@@ -24,6 +25,19 @@ app = FastAPI(
 )
 
 FRONTEND_DIST = BASE_DIR / "frontend" / "client" / "dist"
+
+app.mount(
+    "/assets",
+    StaticFiles(directory=FRONTEND_DIST / "assets"),
+    name="frontend-assets",
+)
+PUBLIC_ASSETS = FRONTEND_DIST / "asset"
+if PUBLIC_ASSETS.is_dir():
+    app.mount(
+        "/asset",
+        StaticFiles(directory=PUBLIC_ASSETS),
+        name="frontend-public-assets",
+    )
 
 
 class TravelRequest(BaseModel):

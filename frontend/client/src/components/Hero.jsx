@@ -1,21 +1,13 @@
-import { useState } from "react";
 import { ArrowUpRight, Compass } from "lucide-react";
 
-const HERO_FRAME = "/asset/ezgif-frame-001.jpg";
 const HERO_FALLBACK =
   "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2400&q=85";
 
 function Hero() {
-  const [image, setImage] = useState(HERO_FRAME);
-
   return (
     <section className="hero" aria-label="TripMate introduction">
       <div className="hero-media">
-        <img
-          src={image}
-          alt="A wide travel landscape"
-          onError={() => setImage(HERO_FALLBACK)}
-        />
+        <img src={HERO_FALLBACK} alt="A wide travel landscape" />
       </div>
       <div className="hero-grid" />
 
