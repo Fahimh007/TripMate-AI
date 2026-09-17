@@ -2,6 +2,8 @@
 
 TripMate AI is a multi-agent travel planner. It combines a React interface, a FastAPI API, LangGraph orchestration, Groq, MCP tools, and PostgreSQL-backed conversation state to create travel plans with human review.
 
+#### live: https://tripmate-ai-fhzl.onrender.com/
+
 ## Architecture
 
 ![TripMate AI architecture](frontend/client/public/asset/d__AI_project_TripMate_TripMate-AI_demo.png)
