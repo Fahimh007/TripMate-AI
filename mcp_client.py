@@ -10,10 +10,8 @@ from langchain_groq import ChatGroq
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 
-# =========================================================
-# Environment setup
-# =========================================================
 
+# Environment setup
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -61,20 +59,14 @@ def _subprocess_env(**updates: str | None) -> dict[str, str]:
     return env
 
 
-# =========================================================
 # LLM
-# =========================================================
-
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
     api_key=_require_env("GROQ_API_KEY", GROQ_API_KEY),
 )
 
 
-# =========================================================
 # MCP client
-# =========================================================
-
 client = MultiServerMCPClient(
     {
         "tavily": {
@@ -188,10 +180,7 @@ async def _get_server_tool(
     return tool
 
 
-# =========================================================
 # MCP connection test
-# =========================================================
-
 async def get_all_tools() -> None:
     """
     Test every MCP server independently.
@@ -228,10 +217,7 @@ async def get_all_tools() -> None:
             )
 
 
-# =========================================================
 # Tavily MCP
-# =========================================================
-
 async def tavily_mcp_search(query: str):
     search_tool = await _get_server_tool(
         "tavily",
@@ -245,10 +231,7 @@ async def tavily_mcp_search(query: str):
     )
 
 
-# =========================================================
 # AviationStack MCP
-# =========================================================
-
 async def aviation_mcp_call(
     tool_name: str,
     tool_args: dict[str, Any] | None = None,
@@ -263,10 +246,7 @@ async def aviation_mcp_call(
     )
 
 
-# =========================================================
 # Weather MCP
-# =========================================================
-
 async def weather_mcp_search(city: str):
     weather_tool = await _get_server_tool(
         "weather",
@@ -293,10 +273,7 @@ async def forecast_mcp_search(city: str):
     )
 
 
-# =========================================================
 # Destination extractor
-# =========================================================
-
 def extract_destination(query: str) -> str:
     prompt = f"""
 Extract only the destination city or country from the travel request.
