@@ -10,10 +10,7 @@ from langchain_groq import ChatGroq
 from langchain_mcp_adapters.client import MultiServerMCPClient
 
 
-# =========================================================
 # Environment setup
-# =========================================================
-
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
@@ -61,20 +58,14 @@ def _subprocess_env(**updates: str | None) -> dict[str, str]:
     return env
 
 
-# =========================================================
 # LLM
-# =========================================================
-
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
     api_key=_require_env("GROQ_API_KEY", GROQ_API_KEY),
 )
 
 
-# =========================================================
 # MCP client
-# =========================================================
-
 client = MultiServerMCPClient(
     {
         "tavily": {

@@ -55,9 +55,6 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise ValueError("GROQ_API_KEY is missing. Please add it to your .env file.")
 
-# =========================
-# LLM - original model kept
-# =========================
 llm = ChatGroq(
     model="openai/gpt-oss-20b",
     api_key=GROQ_API_KEY,
@@ -374,12 +371,12 @@ def weather_agent(state: TravelState):
         )
 
         weather_results = f"""
-Current Weather:
-{weather_data}
+        Current Weather:
+        {weather_data}
 
-Forecast:
-{forecast_data}
-"""
+        Forecast:
+        {forecast_data}
+        """
 
     except Exception as exc:
         print(

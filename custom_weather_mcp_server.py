@@ -6,7 +6,6 @@ import requests
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
-
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
